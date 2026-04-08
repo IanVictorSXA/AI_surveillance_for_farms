@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Make - PiStream</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        /* GLOBAL PAGE SETTINGS */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: black;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        /* FULLSCREEN CAMERA BACKGROUND */
+        #camera-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1; /* Behind all UI */
+        }
+
+        #camera-feed {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 100%;
+            width: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* TOP LEFT LOGO */
+        .top-right-logo {
+            position: absolute;
+            top: 3%;
+            left: 2%;
+            font-size: 38px;
+            color: white;
+            opacity: 0.6;
+            z-index: 10;
+        }
+
+        /* BOTTOM NAVBAR */
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            padding: 12px 0;
+            z-index: 10;
+        }
+
+        .navbar button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 10px;
+        }
+
+        .navbar i.fa {
+            border-radius: 50%;
+            padding: 0.6em 0.7em;
+            box-shadow: 0 0 2px #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- FULLSCREEN CAMERA BG -->
+    <div id="camera-container">
+        <img id="camera-feed" src="{{ url_for('video_feed') }}">
+    </div>
+
+    <!-- TOP LEFT TITLE -->
+    <div class="top-right-logo">
+        Raspberry Pi - Camera Stream
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script>
+        // Hide the camera stream when pressing the red X
+        document.getElementById('stop-stream-button').onclick = function() {
+            const cam = document.getElementById('camera-container');
+            cam.style.display = (cam.style.display === 'none') ? 'block' : 'none';
+        };
+
+        // Call /picture when the camera icon is pressed
+        document.getElementById('take-picture-button').onclick = function() {
+            $.getJSON('/picture', function(data) {
+                console.log("Picture taken.");
+            });
+        };
+    </script>
+
+</body>
+</html>
