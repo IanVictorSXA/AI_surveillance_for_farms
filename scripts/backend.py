@@ -67,7 +67,7 @@ class camera:
     quality = 80 # JPEG quality for encoding frames sent in email alerts and dashboard, can be adjusted to balance quality and size of the images
     verbose = False # If True, print detailed logs for debugging and monitoring purposes
 
-    def __init__(self, cam_name, conf_threshold=0.5, interval_email=30, use_lora=False, lora_timer=10, upside_down=False):
+    def __init__(self, cam_name, conf_threshold=0.5, interval_email=60, use_lora=False, lora_timer=10, upside_down=False):
         """
         Initialize a camera object that connects to the given RTSP stream, performs inference using the specified model, 
         and sends email alerts and LoRa messages based on detections.
@@ -77,7 +77,7 @@ class camera:
                 If it starts with "rtsp://", it will be used directly as the stream URL.
                 Otherwise, it will be appended to the RTSP_URL base.
             conf_threshold (float, optional): Confidence threshold for detections. Defaults to 0.5.
-            interval_email (int, optional): Minimum interval in seconds between email alerts for the same class. Defaults to 30.
+            interval_email (int, optional): Minimum interval in seconds between email alerts for the same class. Defaults to 60.
             lora (bool, optional): Whether to send LoRa messages based on detections. Defaults to False.
             lora_timer (int, optional): Time in seconds to wait before sending a LoRa SLEEP message after the last detection. Defaults to 10.
             """
