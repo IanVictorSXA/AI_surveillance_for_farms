@@ -67,7 +67,7 @@ class camera:
     quality = 80 # JPEG quality for encoding frames sent in email alerts and dashboard, can be adjusted to balance quality and size of the images
     verbose = False # If True, print detailed logs for debugging and monitoring purposes
 
-    def __init__(self, cam_name, conf_threshold=0.1, interval_email=60, use_lora=False, lora_timer=10, night_mode=False):
+    def __init__(self, cam_name, conf_threshold=0.5, interval_email=30, use_lora=False, lora_timer=10, night_mode=False):
         """
         Initialize a camera object that connects to the given RTSP stream, performs inference using the specified model, 
         and sends email alerts and LoRa messages based on detections.
@@ -83,9 +83,6 @@ class camera:
             """
         self.running = True
         self.night_mode = night_mode
-        if self.verbose:
-            print(f"Initializing camera {cam_name} with conf_threshold={conf_threshold}, interval_email={interval_email}, use_lora={use_lora}, lora_timer={lora_timer}, night_mode={night_mode}")
-        
         self.last_emails = []
 
         self.use_lora = use_lora
@@ -341,7 +338,7 @@ if __name__ == "__main__":
                 cam = camera(cam_name, conf_threshold=0.5, interval_email=15, use_lora=True)
                 break
             else:
-                cam = camera(cam_name, conf_threshold=0.5, interval_email=15, night_mode=True if cam_name == "cam10" else False)
+                cam = camera(cam_name, conf_threshold=0.5, interval_email=15)
             cams.append(cam)
 
         # cam = cams[1] if len(cams) > 1 else cams[0]
