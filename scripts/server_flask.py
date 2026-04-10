@@ -12,8 +12,8 @@ import backend as bk
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
 cameras = {}
-cam_with_lora = "ianRaspPi5"  # Example camera ID that has LoRa integration
-cam_night_mode = "cam1"  # Example camera ID that has night mode enabled
+cam_with_lora = "cam1"  # Example camera ID that has LoRa integration
+cam_night_mode = "cam10"  # Example camera ID that has night mode enabled
 # In-memory database (replace with SQLite or PostgreSQL for production)
 def setup_cams():
     global cameras
