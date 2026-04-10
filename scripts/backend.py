@@ -32,7 +32,7 @@ def get_cameras_list(verbose=False):
     
     return cameras    
 
-def set_up_backend(model="yolo26n2", checks=8, sender="ianvictorsouza20@gmail.com", receiver="ianvictorsouza20@gmail.com", verbose=False):
+def set_up_backend(model="yolo26n2", checks=1, sender="ianvictorsouza20@gmail.com", receiver="ianvictorsouza20@gmail.com", verbose=False):
     sa = SecurityAlarm(verbose=verbose)
 
     with open("password.txt") as file:
@@ -67,7 +67,7 @@ class camera:
     quality = 80 # JPEG quality for encoding frames sent in email alerts and dashboard, can be adjusted to balance quality and size of the images
     verbose = False # If True, print detailed logs for debugging and monitoring purposes
 
-    def __init__(self, cam_name, conf_threshold=0.5, interval_email=30, use_lora=False, lora_timer=10, night_mode=False):
+    def __init__(self, cam_name, conf_threshold=0.5, interval_email=30, use_lora=False, lora_timer=10, upside_down=False):
         """
         Initialize a camera object that connects to the given RTSP stream, performs inference using the specified model, 
         and sends email alerts and LoRa messages based on detections.
@@ -82,7 +82,7 @@ class camera:
             lora_timer (int, optional): Time in seconds to wait before sending a LoRa SLEEP message after the last detection. Defaults to 10.
             """
         self.running = True
-        self.night_mode = night_mode
+        self.upside_down = upside_down
         self.last_emails = []
 
         self.use_lora = use_lora
@@ -106,8 +106,7 @@ class camera:
         self.cap = None
         self.frame_ready = threading.Event()
         self.set_up_cap()
-        self.frame_show = default_frame.copy()
-        self.frame_inference = default_frame.copy()
+        self.frame = default_frame.copy()
         self.frame_bytes = None
 
         self.read_lock = threading.Lock()
@@ -143,13 +142,10 @@ class camera:
         """Continuously perform inference on the latest frame in a separate thread, draw detections, and manage email and LoRa alerts based on the results"""
         while self.running:
             with self.read_lock:
-                ret, frame_show = self.cap.retrieve()
-                
-                if self.night_mode:
-                    frame_inference = cv2.cvtColor(frame_show, cv2.COLOR_BGR2GRAY)
-                    frame_inference = cv2.cvtColor(frame_inference, cv2.COLOR_GRAY2BGR)
-                else:
-                    frame_inference = frame_show
+                ret, frame = self.cap.retrieve()
+            
+            if self.upside_down:
+                frame = cv2.rotate(frame, cv2.ROTATE_180)
                     
             # print("Retrieved frame in %.2f seconds" % (time.time() - start_time))
 
@@ -157,7 +153,7 @@ class camera:
                 time.sleep(0.01)
             else:    
                 if camera.model is not None:
-                    outputs, dw, dh, r = self.model.infer(frame_inference , conf_threshold=self.conf_threshold)
+                    outputs, dw, dh, r = self.model.infer(frame, conf_threshold=self.conf_threshold)
                     
                     ids_spotted = self.check_detections(outputs)
                     self.outputs = []
@@ -166,8 +162,8 @@ class camera:
                         if ids_spotted[class_id]:
                             self.outputs.append(output)
 
-                    draw_boxes(self.outputs, frame_show, self.conf_threshold, dw, dh, r)
-                    frame_bytes = cv2.imencode('.jpg', frame_show, [cv2.IMWRITE_JPEG_QUALITY, self.quality])[1].tobytes()
+                    draw_boxes(self.outputs, frame, self.conf_threshold, dw, dh, r)
+                    frame_bytes = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, self.quality])[1].tobytes()
 
                     if camera.alarm is not None and self.outputs:
                         self.send_email(self.outputs, frame_bytes)
@@ -176,7 +172,7 @@ class camera:
                         self.send_lora_message(self.outputs)
 
                 with self.return_lock:
-                    self.frame_show = frame_show
+                    self.frame = frame
                     self.frame_bytes = frame_bytes
                     self.frame_ready.set()
     

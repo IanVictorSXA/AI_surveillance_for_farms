@@ -13,7 +13,7 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
 cameras = {}
 cam_with_lora = "ianRaspPi5"  # Example camera ID that has LoRa integration
-cam_night_mode = "cam1"  # Example camera ID that has night mode enabled
+cam_upside_down = "mystream"  # Example camera ID that has upside down mode enabled
 # In-memory database (replace with SQLite or PostgreSQL for production)
 def setup_cams():
     global cameras
@@ -21,7 +21,7 @@ def setup_cams():
 
     if not cameras:
         for cam in cameras_list:
-            cameras[cam] = bk.camera(cam, use_lora=True if cam == cam_with_lora else False, night_mode= True if cam == cam_night_mode else False)
+            cameras[cam] = bk.camera(cam, use_lora=True if cam == cam_with_lora else False, upside_down= True if cam == cam_upside_down else False)
     
     if cameras:
         for cam in cameras.copy().keys():
